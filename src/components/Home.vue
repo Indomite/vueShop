@@ -6,6 +6,7 @@
               <img src="../assets/Homyit.png" alt="">
             </div>
             <el-menu
+            :default-active="activePath"
             background-color="#344766"
             text-color="#fff"
             active-text-color="#ffd04b"
@@ -19,7 +20,11 @@
                 <i class="el-icon-menu"></i>
                 <span>{{item.authName}}</span>
               </template>
-                <el-menu-item :index="'/' + subItem.path + ''" v-for="subItem in item.children" :key="subItem.id">
+                <el-menu-item
+                  :index="'/' + subItem.path + ''"
+                  v-for="subItem in item.children"
+                  :key="subItem.id"
+                  @click="savaNavStatus('/' + subItem.path)">
                   <template slot="title">
                     <i class="el-icon-s-grid"></i>
                     <span>{{subItem.authName}}</span>
@@ -50,11 +55,15 @@ export default {
   data () {
     return {
       menuList: [],
-      isCollapse: false
+      // 菜单是否收缩
+      isCollapse: false,
+      // 被激活的链接地址
+      activePath: ''
     }
   },
   created () {
     this.getMenuList()
+    this.activePath = window.sessionStorage.activePath
   },
   methods: {
     // 退出
@@ -71,6 +80,11 @@ export default {
     },
     toggleCollapse () {
       this.isCollapse = !this.isCollapse
+    },
+    // 保存链接激活状态
+    savaNavStatus (activePath) {
+      window.sessionStorage.setItem('activePath', activePath)
+      this.activePath = activePath
     }
   }
 }
