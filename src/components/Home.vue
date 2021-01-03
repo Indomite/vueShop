@@ -116,7 +116,7 @@ export default {
   background: #344766;
   .homeLogo {
     text-align: center;
-    background: #344759;
+    background: #409EFF;
     img {
       height: 40px;
       padding: 8px;
