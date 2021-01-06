@@ -43,14 +43,26 @@
         <el-table-column label="角色名称" prop="roleName"></el-table-column>
         <el-table-column label="角色描述" prop="roleDesc"></el-table-column>
         <el-table-column label="操作" width="300px">
-          <template>
+          <template slot-scope="scope">
             <el-button size="mini" type="primary" icon="el-icon-edit">编辑</el-button>
             <el-button size="mini" type="danger" icon="el-icon-delete">删除</el-button>
-            <el-button size="mini" type="warning" icon="el-icon-setting">分配权限</el-button>
+            <el-button size="mini" type="warning" icon="el-icon-setting" @click="showSetRightDialog(scope.row)">分配权限</el-button>
           </template>
         </el-table-column>
       </el-table>
     </el-card>
+    <!-- 分配权限的对话框 -->
+    <el-dialog
+      title="分配权限"
+      :visible.sync="setRightDialogVisible"
+      width="50%">
+      <!-- 树形空间 -->
+      <el-tree :default-checked-keys="defKeys" default-expand-all show-checkbox :data="rightsList" :props="treeProps" node-key="id"></el-tree>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="setRightDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="setRightDialogVisible = false">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 
 </template>
@@ -59,7 +71,15 @@
 export default {
   data () {
     return {
-      roleList: []
+      roleList: [],
+      setRightDialogVisible: false,
+      rightsList: [],
+      treeProps: {
+        label: 'authName',
+        children: 'children'
+      },
+      // 默认保存的节点
+      defKeys: []
     }
   },
   created () {
@@ -73,7 +93,7 @@ export default {
         return this.$message.error('获取角色列表失败')
       }
       this.roleList = res.data
-      console.log(this.roleList)
+      // console.log(this.roleList)
     },
     // 根据ID删除信息
     async removeById (role, rightId) {
@@ -93,9 +113,30 @@ export default {
       /*
         由于页面会重新刷新不采用函数重新调用的方式,
         采用数据直接赋值的方式可以直接更新数据
+        this.getRolesList()
       */
-      // this.getRolesList()
       role.chilsren = res.data
+    },
+    // 展开权限处理界面
+    async showSetRightDialog (role) {
+      // 获取所有权限的数据
+      const { data: res } = await this.$http.get('rights/tree')
+      if (res.meta.status !== 200) {
+        return this.$message.error('获取失败')
+      }
+      this.$message.success('获取成功')
+      this.rightsList = res.data
+      this.getLeafKeys(role, this.defKeys)
+      // console.log(this.rightsList)
+      this.setRightDialogVisible = true
+    },
+    // 通过递归的方式获取角色项id
+    getLeafKeys (node, arr) {
+      // 三级节点
+      if (!node.children) {
+        return arr.push(node.id)
+      }
+      node.children.forEach(item => this.getLeafKeys(item, arr))
     }
   }
 }

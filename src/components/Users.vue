@@ -184,7 +184,7 @@ export default {
       if (res.meta.status !== 200) return this.$message.error('用户列表获取失败')
       this.userList = res.data.users
       this.total = res.data.total
-      console.log(res)
+      // console.log(res)
     },
     async userStateChanged (userInfo) {
       const { data: res } = await this.$http.put(`users/${userInfo.id}/state/${userInfo.mg_state}`)
@@ -196,13 +196,13 @@ export default {
     },
     // 监听页码的变化
     handleSizeChange (newSize) {
-      console.log(newSize)
+      // console.log(newSize)
       this.queryInfo.pagesize = newSize
       this.getUserList()
     },
     // 监听页码值的变化
     handleCurrentChange (newPage) {
-      console.log(newPage)
+      // console.log(newPage)
       this.queryInfo.pagenum = newPage
       this.getUserList()
     },
@@ -221,11 +221,11 @@ export default {
         this.$message.success('添加用户成功')
         this.addDialogVisible = false
         this.getUserList()
-        console.log(valid)
+        // console.log(valid)
       })
     },
     async showEditDialog (id) {
-      console.log(id)
+      // console.log(id)
       const { data: res } = await this.$http.get('users/' + id)
       if (res.meta.status !== 200) {
         return
@@ -246,7 +246,7 @@ export default {
         this.$message.success('修改用户成功')
         this.editDialogVisible = false
         this.getUserList()
-        console.log(valid)
+        // console.log(valid)
       })
     },
     async removeUserById (id) {
