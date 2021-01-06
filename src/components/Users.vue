@@ -259,6 +259,7 @@ export default {
       })
       if (confirmResult !== 'confirm') {
         this.$message.info('已取消')
+        return
       }
       const { data: res } = await this.$http.delete('users/' + id)
       if (res.meta.status !== 200) {
