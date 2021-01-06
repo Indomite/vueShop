@@ -20,19 +20,19 @@
             <!-- 一级权限 -->
             <el-row :class="['bdbottom', 'vcenter', i1 === 0 ? 'bdtop':'']" v-for="(item1, i1) in scope.row.children" :key="item1.id">
               <el-col :span="5">
-                <el-tag>{{item1.authName}}</el-tag>
+                <el-tag closable @close="removeById(scope.row, item1.id)">{{item1.authName}}</el-tag>
                 <i class="el-icon-caret-right"></i>
               </el-col>
               <el-col :span="19">
                 <!-- 二级权限 -->
                 <el-row :class="['vcenter', i2 === 0 ? '':'bdtop']" v-for="(item2, i2) in item1.children" :key="item2.id">
                   <el-col :span="6">
-                    <el-tag type="success">{{item2.authName}}</el-tag>
+                    <el-tag type="success" closable @close="removeById(scope.row, item2.id)">{{item2.authName}}</el-tag>
                     <i class="el-icon-caret-right"></i>
                   </el-col>
                   <el-col :span="18">
                     <!-- 三级权限 -->
-                    <el-tag v-for="item3 in item2.children" :key="item3.id" type="warning">{{item3.authName}}</el-tag>
+                    <el-tag v-for="item3 in item2.children" :key="item3.id" type="warning" closable @close="removeById(scope.row, item3.id)">{{item3.authName}}</el-tag>
                   </el-col>
                 </el-row>
               </el-col>
@@ -43,14 +43,26 @@
         <el-table-column label="角色名称" prop="roleName"></el-table-column>
         <el-table-column label="角色描述" prop="roleDesc"></el-table-column>
         <el-table-column label="操作" width="300px">
-          <template>
+          <template slot-scope="scope">
             <el-button size="mini" type="primary" icon="el-icon-edit">编辑</el-button>
             <el-button size="mini" type="danger" icon="el-icon-delete">删除</el-button>
-            <el-button size="mini" type="warning" icon="el-icon-setting">分配权限</el-button>
+            <el-button size="mini" type="warning" icon="el-icon-setting" @click="showSetRightDialog(scope.row)">分配权限</el-button>
           </template>
         </el-table-column>
       </el-table>
     </el-card>
+    <!-- 分配权限的对话框 -->
+    <el-dialog
+      title="分配权限"
+      :visible.sync="setRightDialogVisible"
+      width="50%">
+      <!-- 树形空间 -->
+      <el-tree :default-checked-keys="defKeys" default-expand-all show-checkbox :data="rightsList" :props="treeProps" node-key="id"></el-tree>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="setRightDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="setRightDialogVisible = false">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 
 </template>
@@ -59,20 +71,72 @@
 export default {
   data () {
     return {
-      roleList: []
+      roleList: [],
+      setRightDialogVisible: false,
+      rightsList: [],
+      treeProps: {
+        label: 'authName',
+        children: 'children'
+      },
+      // 默认保存的节点
+      defKeys: []
     }
   },
   created () {
     this.getRolesList()
   },
   methods: {
+    // 获取权限列表
     async getRolesList () {
       const { data: res } = await this.$http.get('roles')
       if (res.meta.status !== 200) {
         return this.$message.error('获取角色列表失败')
       }
       this.roleList = res.data
-      console.log(this.roleList)
+      // console.log(this.roleList)
+    },
+    // 根据ID删除信息
+    async removeById (role, rightId) {
+      const confirmResult = await this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).catch(err => err)
+      if (confirmResult !== 'confirm') {
+        return this.$message.info('取消了删除信息')
+      }
+      const { data: res } = await this.$http.delete(`roles/${role.id}/rights/${rightId}`)
+      if (res.meta.status !== 200) {
+        return this.$message.error('删除失败')
+      }
+      this.$message.success('删除成功')
+      /*
+        由于页面会重新刷新不采用函数重新调用的方式,
+        采用数据直接赋值的方式可以直接更新数据
+        this.getRolesList()
+      */
+      role.chilsren = res.data
+    },
+    // 展开权限处理界面
+    async showSetRightDialog (role) {
+      // 获取所有权限的数据
+      const { data: res } = await this.$http.get('rights/tree')
+      if (res.meta.status !== 200) {
+        return this.$message.error('获取失败')
+      }
+      this.$message.success('获取成功')
+      this.rightsList = res.data
+      this.getLeafKeys(role, this.defKeys)
+      // console.log(this.rightsList)
+      this.setRightDialogVisible = true
+    },
+    // 通过递归的方式获取角色项id
+    getLeafKeys (node, arr) {
+      // 三级节点
+      if (!node.children) {
+        return arr.push(node.id)
+      }
+      node.children.forEach(item => this.getLeafKeys(item, arr))
     }
   }
 }
