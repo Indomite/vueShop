@@ -26,3 +26,7 @@ html,body,#app {
 .el-table td, .el-table th {
     text-align: center;
 }
+
+.el-cascader-panel {
+    height: 200px;
+}
