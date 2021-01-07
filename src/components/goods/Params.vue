@@ -34,7 +34,23 @@
         <el-tab-pane label="动态参数" name="many">
           <el-button type="primary" size="mini" :disabled="isBtnDisabled" @click="addDialogVisible = true">添加参数</el-button>
           <el-table :data="manyTableData" border stripe>
-            <el-table-column type="expand"></el-table-column>
+            <el-table-column type="expand">
+              <template slot-scope="scope">
+                <!-- tag 标签 -->
+                <el-tag v-for="(item, i) in scope.row.attr_vals" :key="i" closable>{{item}}</el-tag>
+                <el-input
+                  class="input-new-tag"
+                  v-if="scope.row.inputVisible"
+                  v-model="scope.row.inputValue"
+                  ref="saveTagInput"
+                  size="small"
+                  @keyup.enter.native="handleInputConfirm(scope.row)"
+                  @blur="handleInputConfirm(scope.row)"
+                >
+                </el-input>
+                <el-button v-else class="button-new-tag" size="small" @click="showInput(scope.row)">+ New Tag</el-button>
+              </template>
+            </el-table-column>
             <el-table-column type="index"></el-table-column>
             <el-table-column label="参数名称" prop="attr_name"></el-table-column>
             <el-table-column label="操作">
@@ -130,7 +146,7 @@ export default {
         attr_name: [
           { required: true, message: '请输入参数名称', trigger: 'blur' }
         ]
-      },
+      }
     }
   },
   created () {
@@ -171,6 +187,12 @@ export default {
       } else {
         this.onlyTableData = res.data
       }
+      res.data.forEach (item => {
+        // 判断分割
+        item.attr_vals = item.attr_vals ? item.attr_vals.split(' ') : []
+        item.inputVisible = false
+        item.inputValue = ''
+      })
       // console.log(res.data)
     },
     addDialogClosed () {
@@ -229,6 +251,16 @@ export default {
       }
       this.$message.success('删除参数成功')
       this.getParamsData()
+    },
+    // 文本框失去焦点
+    handleInputConfirm (row) {
+      row.inputVisible = false
+    },
+    async showInput (row) {
+      row.inputVisible = true
+      await this.$nextTick(() => {
+        this.$refs.saveTagInput.$refs.input.focus();
+      });
     }
   },
   computed: {
@@ -255,5 +287,13 @@ export default {
 <style lang='less' scoped>
 .el-col {
   margin: 15px 0;
+}
+
+.el-tag {
+  margin: 0 10px;
+}
+
+.input-new-tag {
+  width: 150px;
 }
 </style>
