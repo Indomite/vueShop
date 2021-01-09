@@ -100,10 +100,10 @@ export default {
       },
       addressFormRules: {
         address1: [
-          { required: true, message: '请输入选择省市区/县', trigger: 'blur'}
+          { required: true, message: '请输入选择省市区/县', trigger: 'blur' }
         ],
         address2: [
-          { required: true, message: '请输入选择详细地址', trigger: 'blur'}
+          { required: true, message: '请输入选择详细地址', trigger: 'blur' }
         ]
       },
       cityData: cityData,
@@ -123,7 +123,7 @@ export default {
       this.$message.success('获取订单信息成功')
       this.total = res.data.total
       this.orderList = res.data.goods
-      console.log(res.data);
+      // console.log(res.data)
     },
     handleSizeChange (newSize) {
       this.queryInfo.pagesize = newSize

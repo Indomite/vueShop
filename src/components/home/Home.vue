@@ -3,7 +3,7 @@
       <!-- 侧边栏 -->
         <el-aside :width="isCollapse ? '64px':'200px'">
             <div class="homeLogo">
-              <img src="../assets/Homyit.png" alt="">
+              <img src="../../assets/Homyit.png" alt="">
             </div>
             <el-menu
             :default-active="activePath"
