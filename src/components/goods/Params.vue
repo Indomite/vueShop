@@ -182,13 +182,12 @@ export default {
       if (res.meta.status !== 200) {
         return this.$message.error('获取参数列表失败')
       }
-      if (this.activeName === "many") {
+      if (this.activeName === 'many') {
         this.manyTableData = res.data
       } else {
         this.onlyTableData = res.data
       }
-      res.data.forEach (item => {
-        // 判断分割
+      res.data.forEach (item => { // 判断分割
         item.attr_vals = item.attr_vals ? item.attr_vals.split(' ') : []
         item.inputVisible = false
         item.inputValue = ''
@@ -259,13 +258,13 @@ export default {
     async showInput (row) {
       row.inputVisible = true
       await this.$nextTick(() => {
-        this.$refs.saveTagInput.$refs.input.focus();
-      });
+        this.$refs.saveTagInput.$refs.input.focus()
+      })
     }
   },
   computed: {
     isBtnDisabled () {
-      return this.selectedCateKeys.length !== 3 ? true :  false
+      return this.selectedCateKeys.length !== 3
     },
     cateId () {
       if (this.selectedCateKeys.length === 3) {
@@ -274,7 +273,7 @@ export default {
       return null
     },
     titleText () {
-      if (this.activeName === "many") {
+      if (this.activeName === 'many') {
         return '动态参数'
       }
       return '静态属性'
