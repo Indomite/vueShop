@@ -54,7 +54,7 @@ export default {
   // 此时页面上元素渲染完毕
   async mounted () {
     // 3.初始化echarts实例
-    let myChart = echarts.init(document.getElementById('main'));
+    const myChart = echarts.init(document.getElementById('main'))
     // 4.指定图表的配置项和数据
     const { data: res } = await this.$http.get('reports/type/1')
     if (res.meta.status !== 200) {
