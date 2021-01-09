@@ -69,7 +69,8 @@
             </el-upload>
           </el-tab-pane>
           <el-tab-pane label="商品内容" name="4">
-            <quill-editor>
+            <quill-editor v-model="addForm.goods_introduce"></quill-editor>
+            <el-button type="primary" @click="add">添加商品</el-button>
           </el-tab-pane>
         </el-tabs>
       </el-form>
@@ -85,6 +86,7 @@
 </template>
 
 <script>
+import _ from 'lodash'
 export default {
   data () {
     return {
@@ -95,24 +97,26 @@ export default {
         goods_weight: 0,
         goods_number: 0,
         goods_cat: [],
-        pics: []
+        pics: [],
+        goods_introduce: '',
+        attrs: []
       },
       addFormRules: {
         goods_name: [
-          { required: true, message: '请输入商品名称', trigger: "blur" }
+          { required: true, message: '请输入商品名称', trigger: 'blur' }
         ],
         goods_price: [
-          { required: true, message: '请输入商品价格', trigger: "blur" }
+          { required: true, message: '请输入商品价格', trigger: 'blur' }
         ],
         goods_weight: [
-          { required: true, message: '请输入商品重量', trigger: "blur" }
+          { required: true, message: '请输入商品重量', trigger: 'blur' }
         ],
         goods_number: [
-          { required: true, message: '请输入商品数量', trigger: "blur" }
+          { required: true, message: '请输入商品数量', trigger: 'blur' }
         ],
         goods_cat: [
-          { required: true, message: '请选择商品分类', trigger: "blur" }
-        ],
+          { required: true, message: '请选择商品分类', trigger: 'blur' }
+        ]
       },
       catelist: [],
       cateProps: {
@@ -147,7 +151,7 @@ export default {
         this.addForm.goods_cat = []
       }
     },
-    beforeTabLeave (activeName,oldActiveName) {
+    beforeTabLeave (activeName, oldActiveName) {
       // console.log(activeName,oldActiveName)
       if (oldActiveName === '0' && this.addForm.goods_cat.length !== 3) {
         this.$message.error('请先选择商品分类')
@@ -156,7 +160,7 @@ export default {
     },
     async tabClicked () {
       if (this.activeIndex === '1') {
-        const { data: res } = await this.$http.get(`categories/${ this.cateId }/attributes`, { params: { sel: 'many' } })
+        const { data: res } = await this.$http.get(`categories/${this.cateId}/attributes`, { params: { sel: 'many' } })
         if (res.meta.status !== 200) {
           return this.$message.error('获取动态参数列表失败')
         }
@@ -166,7 +170,7 @@ export default {
         // console.log(res.data)
         this.manyTableData = res.data
       } else if (this.activeIndex === '2') {
-        const { data: res } = await this.$http.get(`categories/${ this.cateId }/attributes`, { params: { sel: 'only' } })
+        const { data: res } = await this.$http.get(`categories/${this.cateId}/attributes`, { params: { sel: 'only' } })
         if (res.meta.status !== 200) {
           return this.$message.error('获取静态属性列表失败')
         }
@@ -179,18 +183,51 @@ export default {
       this.previewPath = file.response.data.url
       this.previewVisible = true
     },
-    // 处理移除图片操作
-    handleRemove () {},
     handleSuccess (response) {
       const picInfo = { pic: response.data.tmp_path }
       this.addForm.pics.push(picInfo)
       // console.log(this.addForm)
     },
+    // 处理移除图片操作
     handleRemove (file) {
       const filePath = file.response.data.tmp_path
       const i = this.addForm.pics.findIndex(x => x.pic === filePath)
       this.addForm.pics.splice(i, 1)
       // console.log(this.addForm)
+    },
+    // 添加商品内容
+    add () {
+      this.$refs.addFormRef.validate(async valid => {
+        if (!valid) {
+          return this.$message.error('请填写必要的信息')
+        }
+        const form = _.cloneDeep(this.addForm)
+        form.goods_cat = form.goods_cat.join(',')
+        // 处理动态参数、静态属性
+        this.manyTableData.forEach(item => {
+          const newInfo = {
+            attr_id: item.attr_id,
+            attr_value: item.attr_vals.join(' ')
+          }
+          this.addForm.attrs.push(newInfo)
+        })
+        this.onlyTableData.forEach(item => {
+          const newInfo = {
+            attr_id: item.attr_id,
+            attr_value: item.attr_vals
+          }
+          this.addForm.attrs.push(newInfo)
+        })
+        form.attrs = this.addForm.attrs
+        // console.log(form)
+        // 添加商品
+        const { data: res } = await this.$http.post('goods', form)
+        if (res.meta.status !== 201) {
+          return this.$message.error('提交数据失败')
+        }
+        this.$message.success('提交数据成功')
+        this.$router.push('/goods')
+      })
     }
   },
   computed: {
@@ -217,5 +254,9 @@ export default {
 
 .previewImg {
   width: 100%;
+}
+
+.quill-editor {
+  margin-bottom: 15px;
 }
 </style>
