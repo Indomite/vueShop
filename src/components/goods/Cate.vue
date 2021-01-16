@@ -194,9 +194,9 @@ export default {
     },
     // 监听对话框关闭
     addCateDialogClose () {
-      this.$refs.addCateFormRef .resetFields(),
-      this.selectedKeys = [],
-      this.addCateForm.cat_level = 0,
+      this.$refs.addCateFormRef.resetFields()
+      this.selectedKeys = []
+      this.addCateForm.cat_level = 0
       this.addCateForm.cat_pid = 0
     }
   }
