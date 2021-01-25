@@ -73,11 +73,11 @@ export default {
   },
   methods: {
     async getGoodsList () {
-      const { data: res } = await this.$http.get('goods', { params: this.queryInfo})
+      const { data: res } = await this.$http.get('goods', { params: this.queryInfo })
       if (res.meta.status !== 200) {
-        return this.$message.error("获取数据失败")
+        return this.$message.error('获取数据失败')
       }
-      this.$message.success("获取数据成功")
+      this.$message.success('获取数据成功')
       this.goodslist = res.data.goods
       this.total = res.data.total
     },
@@ -100,9 +100,9 @@ export default {
       }
       const { data: res } = await this.$http.delete(`goods/${id}`)
       if (res.meta.status !== 200) {
-        return this.$message.error("删除商品失败")
+        return this.$message.error('删除商品失败')
       }
-      this.$message.success("删除商品成功")
+      this.$message.success('删除商品成功')
       this.getGoodsList()
     },
     goAddpage () {
